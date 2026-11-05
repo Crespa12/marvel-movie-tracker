@@ -2664,6 +2664,42 @@ html&gt;body{padding:0}&lt;/style&gt;
     #mcu-watch-guide .command-form { display: flex; gap: 0.45rem; }
     #mcu-watch-guide .command-form .game-input { min-width: 0; flex: 1; }
     #mcu-watch-guide .command-response { min-height: 2rem; margin: 0.62rem 0 0; color: #c1cce2; font-size: 0.72rem; line-height: 1.45; }
+    #mcu-watch-guide .contracts-grid { grid-template-columns: minmax(0, 1fr); }
+    #mcu-watch-guide .command-console {
+      position: sticky;
+      z-index: 5;
+      bottom: 0.55rem;
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 0.85rem;
+      padding: 0.7rem;
+      border: 1px solid rgba(83, 125, 211, 0.36);
+      border-radius: 15px;
+      background: rgba(7, 14, 29, 0.96);
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(16px);
+    }
+    #mcu-watch-guide .command-console-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+    #mcu-watch-guide .command-console-head h3 { margin: 0.15rem 0 0; color: #edf3ff; font-size: 0.9rem; font-weight: 500; }
+    #mcu-watch-guide .command-feed {
+      display: grid;
+      gap: 0.38rem;
+      max-height: 132px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding: 0.15rem 0.1rem;
+      scrollbar-color: rgba(135, 160, 211, 0.45) transparent;
+    }
+    #mcu-watch-guide .command-entry { display: grid; gap: 0.22rem; min-width: 0; }
+    #mcu-watch-guide .command-bubble { max-width: min(88%, 680px); padding: 0.42rem 0.58rem; border: 1px solid rgba(156, 177, 217, 0.15); border-radius: 10px; font-size: 0.73rem; line-height: 1.4; overflow-wrap: anywhere; }
+    #mcu-watch-guide .command-bubble-user { justify-self: end; border-color: rgba(110, 139, 238, 0.27); background: rgba(71, 89, 166, 0.19); color: #e5eaff; }
+    #mcu-watch-guide .command-bubble-system { justify-self: start; background: rgba(20, 30, 51, 0.86); color: #cbd7ef; }
+    #mcu-watch-guide .command-speaker { margin-right: 0.35rem; color: #91a9ec; font-size: 0.63rem; font-weight: 600; }
+    #mcu-watch-guide .command-empty { margin: 0; color: #8492ad; font-size: 0.7rem; }
+    #mcu-watch-guide .command-composer { align-items: center; padding: 0.24rem; border: 1px solid rgba(156, 177, 217, 0.2); border-radius: 999px; background: rgba(25, 32, 49, 0.9); }
+    #mcu-watch-guide .command-composer .game-input { min-height: 44px; padding: 0.55rem 0.8rem; border: 0; border-radius: 999px; background: transparent; font-size: 0.82rem; }
+    #mcu-watch-guide .command-composer .game-input:focus { outline: 2px solid rgba(112, 145, 244, 0.52); outline-offset: -2px; }
+    #mcu-watch-guide .command-send { min-width: 46px; min-height: 44px; border-radius: 999px; font-size: 0.78rem; }
     #mcu-watch-guide .inventory-card { padding: clamp(0.8rem, 2vw, 1.1rem); }
     #mcu-watch-guide .inventory-filter-label { display: grid; gap: 0.25rem; color: #aebbd2; font-size: 0.68rem; }
     #mcu-watch-guide .inventory-filter-label .game-select { min-width: 150px; }
@@ -2846,20 +2882,10 @@ html&gt;body{padding:0}&lt;/style&gt;
           &lt;/article&gt;
         &lt;/div&gt;
 
-        &lt;div class=&quot;lower-game-grid&quot;&gt;
+        &lt;div class=&quot;lower-game-grid contracts-grid&quot;&gt;
           &lt;section class=&quot;game-card&quot; aria-labelledby=&quot;quests-title&quot;&gt;
             &lt;div class=&quot;game-card-head&quot;&gt;&lt;div&gt;&lt;p class=&quot;game-kicker&quot;&gt;Daily contracts · reset 3:00 AM&lt;/p&gt;&lt;h3 id=&quot;quests-title&quot;&gt;Daily Quests&lt;/h3&gt;&lt;/div&gt;&lt;button class=&quot;text-button&quot; type=&quot;button&quot; data-go-view=&quot;inventory-view&quot;&gt;View rewards&lt;/button&gt;&lt;/div&gt;
             &lt;div id=&quot;quest-list&quot; class=&quot;quest-list&quot;&gt;&lt;/div&gt;
-          &lt;/section&gt;
-          &lt;section class=&quot;game-card command-card&quot; aria-labelledby=&quot;command-title&quot;&gt;
-            &lt;div class=&quot;game-card-head&quot;&gt;&lt;div&gt;&lt;p class=&quot;game-kicker&quot;&gt;Command console&lt;/p&gt;&lt;h3 id=&quot;command-title&quot;&gt;Quick commands&lt;/h3&gt;&lt;/div&gt;&lt;/div&gt;
-            &lt;p class=&quot;command-hint&quot;&gt;Try &lt;code&gt;!bal&lt;/code&gt;, &lt;code&gt;!op&lt;/code&gt;, &lt;code&gt;!pros&lt;/code&gt;, &lt;code&gt;!son&lt;/code&gt;, &lt;code&gt;!dep&lt;/code&gt;, &lt;code&gt;!inv&lt;/code&gt;, or &lt;code&gt;!q&lt;/code&gt;.&lt;/p&gt;
-            &lt;form id=&quot;command-form&quot; class=&quot;command-form&quot;&gt;
-              &lt;label class=&quot;sr-only&quot; for=&quot;command-input&quot;&gt;Enter a command&lt;/label&gt;
-              &lt;input id=&quot;command-input&quot; class=&quot;game-input&quot; type=&quot;text&quot; autocomplete=&quot;off&quot; placeholder=&quot;Enter a command, e.g. !bal&quot;&gt;
-              &lt;button class=&quot;game-button&quot; type=&quot;submit&quot;&gt;Run&lt;/button&gt;
-            &lt;/form&gt;
-            &lt;p class=&quot;command-response&quot; id=&quot;game-message&quot; aria-live=&quot;polite&quot;&gt;Welcome, Agent. Your field console is ready.&lt;/p&gt;
           &lt;/section&gt;
         &lt;/div&gt;
       &lt;/div&gt;
@@ -2878,6 +2904,17 @@ html&gt;body{padding:0}&lt;/style&gt;
           &lt;section class=&quot;game-card&quot; aria-labelledby=&quot;craft-title&quot;&gt;&lt;div class=&quot;game-card-head&quot;&gt;&lt;div&gt;&lt;p class=&quot;game-kicker&quot;&gt;Use recovered materials&lt;/p&gt;&lt;h3 id=&quot;craft-title&quot;&gt;Stark Workshop&lt;/h3&gt;&lt;/div&gt;&lt;/div&gt;&lt;p class=&quot;shop-intro&quot;&gt;Recipes unlock gradually as you collect blueprints and reach new movie milestones.&lt;/p&gt;&lt;div class=&quot;item-list&quot; id=&quot;recipe-grid&quot;&gt;&lt;/div&gt;&lt;/section&gt;
         &lt;/div&gt;
       &lt;/div&gt;
+
+      &lt;section class=&quot;command-console&quot; aria-labelledby=&quot;command-title&quot;&gt;
+        &lt;div class=&quot;command-console-head&quot;&gt;&lt;div&gt;&lt;p class=&quot;game-kicker&quot;&gt;S.H.I.E.L.D. console&lt;/p&gt;&lt;h3 id=&quot;command-title&quot;&gt;Enter a command&lt;/h3&gt;&lt;/div&gt;&lt;span class=&quot;game-label&quot;&gt;!help for shortcuts&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;command-feed&quot; id=&quot;command-feed&quot; role=&quot;log&quot; aria-live=&quot;polite&quot; aria-label=&quot;Command history&quot;&gt;&lt;p class=&quot;command-empty&quot;&gt;Console online. Try !bal, !op, !pros, !son, !dep, or !help.&lt;/p&gt;&lt;/div&gt;
+        &lt;p class=&quot;command-response&quot; id=&quot;game-message&quot; aria-live=&quot;polite&quot;&gt;Welcome, Agent. Your field console is ready.&lt;/p&gt;
+        &lt;form id=&quot;command-form&quot; class=&quot;command-form command-composer&quot;&gt;
+          &lt;label class=&quot;sr-only&quot; for=&quot;command-input&quot;&gt;Enter a command&lt;/label&gt;
+          &lt;input id=&quot;command-input&quot; class=&quot;game-input&quot; type=&quot;text&quot; autocomplete=&quot;off&quot; spellcheck=&quot;false&quot; placeholder=&quot;Message Avengers Operations… e.g. !bal&quot;&gt;
+          &lt;button class=&quot;game-button command-send&quot; type=&quot;submit&quot; aria-label=&quot;Send command&quot;&gt;Send&lt;/button&gt;
+        &lt;/form&gt;
+      &lt;/section&gt;
     &lt;/section&gt;
   &lt;/main&gt;
 
@@ -3991,7 +4028,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           case &quot;quests&quot;: switchMainPanel(&quot;operations-panel&quot;); switchGameView(&quot;operations-view&quot;); $(&quot;#quest-list&quot;).scrollIntoView({ behavior: &quot;smooth&quot;, block: &quot;center&quot; }); setMessage(&quot;Daily contract board opened.&quot;); break;
           case &quot;shop&quot;: switchMainPanel(&quot;operations-panel&quot;); switchGameView(&quot;workshop-view&quot;); setMessage(&quot;S.H.I.E.L.D. Shop and Stark Workshop opened.&quot;); break;
           case &quot;inventory&quot;: switchMainPanel(&quot;operations-panel&quot;); switchGameView(&quot;inventory-view&quot;); setMessage(&quot;Agent inventory opened.&quot;); break;
-          case &quot;craft&quot;: switchMainPanel(&quot;operations-panel&quot;); switchGameView(&quot;workshop-view&quot;); if (args.length) { const recipe = recipes.find((entry) =&gt; entry.id === args.join(&quot;-&quot;) || entry.name.toLowerCase().includes(args.join(&quot; &quot;).toLowerCase())); if (recipe) craft(recipe.id); else setMessage(&quot;Blueprint not found. Open Shop &amp; Craft to review unlocked recipes.&quot;); } break;
+          case &quot;craft&quot;: switchMainPanel(&quot;operations-panel&quot;); switchGameView(&quot;workshop-view&quot;); if (args.length) { const recipe = recipes.find((entry) =&gt; entry.id === args.join(&quot;-&quot;) || entry.name.toLowerCase().includes(args.join(&quot; &quot;).toLowerCase())); if (recipe) craft(recipe.id); else setMessage(&quot;Blueprint not found. Open Shop &amp; Craft to review unlocked recipes.&quot;); } else setMessage(&quot;Stark Workshop opened. Choose an available blueprint or add its name after !craft.&quot;); break;
           case &quot;buffs&quot;: switchMainPanel(&quot;operations-panel&quot;); switchGameView(&quot;inventory-view&quot;); $(&quot;#inventory-filter&quot;).value = &quot;buff&quot;; renderInventory(); setMessage(&quot;Active buffs and usable boost items are shown in Inventory.&quot;); break;
           case &quot;zones&quot;: switchMainPanel(&quot;operations-panel&quot;); switchGameView(&quot;operations-view&quot;); setMessage(`Unlocked sites: ${eligibleZones(&quot;prospect&quot;).length} prospecting, ${eligibleZones(&quot;sonar&quot;).length} sonar, ${eligibleZones(&quot;deploy&quot;).length} deployment.`); break;
           case &quot;use&quot;: useNamedItem(args.join(&quot; &quot;)); break;
@@ -3999,6 +4036,33 @@ html&gt;body{padding:0}&lt;/style&gt;
           case &quot;help&quot;: setMessage(&quot;Commands: !bal, !op, !pros [zone], !son [zone], !dep [ally] [zone], !q, !shop, !inv, !cf [recipe], !bf, !z, !use [item], !open [box].&quot;); break;
           default: setMessage(`Unknown command: !${original}. Try !help for the command list.`);
         }
+      };
+
+      const appendCommandEntry = (command, response) =&gt; {
+        const feed = $(&quot;#command-feed&quot;);
+        if (!feed) return;
+        const empty = feed.querySelector(&quot;.command-empty&quot;);
+        if (empty) empty.remove();
+        const entry = document.createElement(&quot;article&quot;);
+        entry.className = &quot;command-entry&quot;;
+        const userMessage = document.createElement(&quot;div&quot;);
+        userMessage.className = &quot;command-bubble command-bubble-user&quot;;
+        const userLabel = document.createElement(&quot;span&quot;);
+        userLabel.className = &quot;command-speaker&quot;;
+        userLabel.textContent = &quot;You&quot;;
+        const commandText = document.createElement(&quot;code&quot;);
+        commandText.textContent = command;
+        userMessage.append(userLabel, commandText);
+        const systemMessage = document.createElement(&quot;div&quot;);
+        systemMessage.className = &quot;command-bubble command-bubble-system&quot;;
+        const systemLabel = document.createElement(&quot;span&quot;);
+        systemLabel.className = &quot;command-speaker&quot;;
+        systemLabel.textContent = &quot;S.H.I.E.L.D.&quot;;
+        systemMessage.append(systemLabel, document.createTextNode(response));
+        entry.append(userMessage, systemMessage);
+        feed.append(entry);
+        while (feed.children.length &gt; 6) feed.firstElementChild.remove();
+        feed.scrollTop = feed.scrollHeight;
       };
 
       $$(&quot;[data-main-panel]&quot;).forEach((button) =&gt; button.addEventListener(&quot;click&quot;, () =&gt; switchMainPanel(button.dataset.mainPanel)));
@@ -4015,7 +4079,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       $(&quot;#inventory-grid&quot;).addEventListener(&quot;click&quot;, (event) =&gt; { const button = event.target.closest(&quot;[data-item-action]&quot;); if (!button) return; if (button.dataset.itemAction === &quot;open&quot;) openBox(button.dataset.itemId); if (button.dataset.itemAction === &quot;use&quot;) useBuff(button.dataset.itemId); });
       $(&quot;#shop-grid&quot;).addEventListener(&quot;click&quot;, (event) =&gt; { const button = event.target.closest(&quot;[data-buy-item]&quot;); if (button) purchase(button.dataset.buyItem); });
       $(&quot;#recipe-grid&quot;).addEventListener(&quot;click&quot;, (event) =&gt; { const button = event.target.closest(&quot;[data-craft-item]&quot;); if (button) craft(button.dataset.craftItem); });
-      $(&quot;#command-form&quot;).addEventListener(&quot;submit&quot;, (event) =&gt; { event.preventDefault(); const input = $(&quot;#command-input&quot;); runCommand(input.value); input.value = &quot;&quot;; });
+      $(&quot;#command-form&quot;).addEventListener(&quot;submit&quot;, (event) =&gt; { event.preventDefault(); const input = $(&quot;#command-input&quot;); const command = input.value.trim(); if (!command) return; runCommand(command); appendCommandEntry(command, pendingNotice); input.value = &quot;&quot;; });
 
       window.addEventListener(&quot;mcu:watched-changed&quot;, (event) =&gt; {
         seenMovies = new Set(event.detail &amp;&amp; Array.isArray(event.detail.watched) ? event.detail.watched : watchedSet());
