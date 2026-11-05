@@ -1812,6 +1812,7 @@ html&gt;body{padding:0}&lt;/style&gt;
   syncTheme();
 })();
 &lt;/script&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
 &lt;div id=&quot;mcu-watch-guide&quot; lang=&quot;es&quot;&gt;
   &lt;style&gt;
     #mcu-watch-guide {
@@ -1840,6 +1841,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     #mcu-watch-guide [hidden] {
       display: none !important;
     }
+    #mcu-watch-guide #operations-panel:target { display: block !important; }
     #mcu-watch-guide .mcu-shell {
       max-width: 1050px;
       margin: 0 auto;
@@ -2435,6 +2437,9 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
     #mcu-watch-guide .main-nav-button,
     #mcu-watch-guide .game-nav-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       min-height: 42px;
       padding: 0.55rem 0.9rem;
       border: 1px solid transparent;
@@ -2444,6 +2449,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       font: inherit;
       font-size: 0.83rem;
       cursor: pointer;
+      text-decoration: none;
     }
     #mcu-watch-guide .main-nav-button.is-active,
     #mcu-watch-guide .game-nav-button.is-active {
@@ -2778,8 +2784,8 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;/section&gt;
 
     &lt;nav class=&quot;main-nav&quot; aria-label=&quot;Secciones de la guía&quot;&gt;
-      &lt;button class=&quot;main-nav-button is-active&quot; type=&quot;button&quot; data-main-panel=&quot;tracker-panel&quot;&gt;Mi recorrido&lt;/button&gt;
-      &lt;button class=&quot;main-nav-button&quot; type=&quot;button&quot; data-main-panel=&quot;operations-panel&quot;&gt;Operaciones de los Vengadores&lt;/button&gt;
+      &lt;a class=&quot;main-nav-button is-active&quot; href=&quot;#tracker-panel&quot; role=&quot;button&quot; aria-controls=&quot;tracker-panel&quot; data-main-panel=&quot;tracker-panel&quot;&gt;Mi recorrido&lt;/a&gt;
+      &lt;a class=&quot;main-nav-button&quot; href=&quot;#operations-panel&quot; role=&quot;button&quot; aria-controls=&quot;operations-panel&quot; data-main-panel=&quot;operations-panel&quot;&gt;Operaciones de los Vengadores&lt;/a&gt;
     &lt;/nav&gt;
 
     &lt;div id=&quot;tracker-panel&quot; class=&quot;tracker-panel&quot;&gt;
@@ -3161,7 +3167,7 @@ html&gt;body{padding:0}&lt;/style&gt;
           view.track.setAttribute(&quot;aria-valuenow&quot;, String(percentValue));
           view.fill.style.width = percentValue + &quot;%&quot;;
           view.achievement.hidden = phaseSeen !== phaseMovies.length || Boolean(phase.upcoming &amp;&amp; phase.upcoming.length);
-          view.summary.textContent = &quot;Ver películas del tracker · &quot; + phaseMovies.length;
+          view.summary.textContent = &quot;Películas de la guía · &quot; + phaseMovies.length;
           view.list.replaceChildren();
           phaseMovies.forEach((movie) =&gt; {
             const item = make(&quot;li&quot;, &quot;&quot;);
