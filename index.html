@@ -2681,6 +2681,13 @@ html&gt;body{padding:0}&lt;/style&gt;
     }
     #mcu-watch-guide .command-console-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
     #mcu-watch-guide .command-console-head h3 { margin: 0.15rem 0 0; color: #edf3ff; font-size: 0.9rem; font-weight: 500; }
+    #mcu-watch-guide .reminder-toasts { position: fixed; z-index: 20; top: 1rem; right: 1rem; display: grid; width: min(22rem, calc(100vw - 2rem)); max-height: min(55vh, 28rem); gap: 0.5rem; overflow-y: auto; pointer-events: none; }
+    #mcu-watch-guide .reminder-toast { display: flex; align-items: flex-start; gap: 0.65rem; padding: 0.75rem; border: 1px solid rgba(234, 179, 8, 0.38); border-radius: 12px; background: rgba(13, 21, 39, 0.98); box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42); color: #e9eefb; pointer-events: auto; }
+    #mcu-watch-guide .reminder-toast-icon { font-size: 1.25rem; }
+    #mcu-watch-guide .reminder-toast-copy { display: grid; flex: 1; gap: 0.2rem; min-width: 0; }
+    #mcu-watch-guide .reminder-toast-copy strong { color: #f5d475; font-size: 0.78rem; }
+    #mcu-watch-guide .reminder-toast-copy span { color: #d1d9e8; font-size: 0.74rem; line-height: 1.4; overflow-wrap: anywhere; }
+    #mcu-watch-guide .reminder-dismiss { display: grid; width: 1.7rem; height: 1.7rem; place-items: center; border: 1px solid rgba(156, 177, 217, 0.2); border-radius: 8px; background: rgba(255,255,255,0.05); color: #d6def0; cursor: pointer; }
     #mcu-watch-guide .command-feed {
       display: grid;
       gap: 0.38rem;
@@ -2906,17 +2913,18 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;/div&gt;
 
       &lt;section class=&quot;command-console&quot; aria-labelledby=&quot;command-title&quot;&gt;
-        &lt;div class=&quot;command-console-head&quot;&gt;&lt;div&gt;&lt;p class=&quot;game-kicker&quot;&gt;Consola de S.H.I.E.L.D.&lt;/p&gt;&lt;h3 id=&quot;command-title&quot;&gt;Escribe un comando&lt;/h3&gt;&lt;/div&gt;&lt;span class=&quot;game-label&quot;&gt;!help muestra la lista&lt;/span&gt;&lt;/div&gt;
-        &lt;div class=&quot;command-feed&quot; id=&quot;command-feed&quot; role=&quot;log&quot; aria-live=&quot;polite&quot; aria-label=&quot;Historial de comandos&quot;&gt;&lt;p class=&quot;command-empty&quot;&gt;Consola lista. Prueba !bal, !op, !pros, !son, !dep o !help.&lt;/p&gt;&lt;/div&gt;
+        &lt;div class=&quot;command-console-head&quot;&gt;&lt;div&gt;&lt;p class=&quot;game-kicker&quot;&gt;Consola de S.H.I.E.L.D.&lt;/p&gt;&lt;h3 id=&quot;command-title&quot;&gt;Escribe un comando&lt;/h3&gt;&lt;/div&gt;&lt;span class=&quot;game-label&quot;&gt;!help · recordatorio: !rm 5m !pros&lt;/span&gt;&lt;/div&gt;
+        &lt;div class=&quot;command-feed&quot; id=&quot;command-feed&quot; role=&quot;log&quot; aria-live=&quot;polite&quot; aria-label=&quot;Historial de comandos&quot;&gt;&lt;p class=&quot;command-empty&quot;&gt;Consola lista. Prueba !bal, !op, !pros, !son, !dep, !rm o !help.&lt;/p&gt;&lt;/div&gt;
         &lt;p class=&quot;command-response&quot; id=&quot;game-message&quot; aria-live=&quot;polite&quot;&gt;Agente, la consola está lista.&lt;/p&gt;
         &lt;form id=&quot;command-form&quot; class=&quot;command-form command-composer&quot;&gt;
           &lt;label class=&quot;sr-only&quot; for=&quot;command-input&quot;&gt;Escribe un comando&lt;/label&gt;
-          &lt;input id=&quot;command-input&quot; class=&quot;game-input&quot; type=&quot;text&quot; autocomplete=&quot;off&quot; spellcheck=&quot;false&quot; placeholder=&quot;Escribe un comando… por ejemplo !bal&quot;&gt;
+          &lt;input id=&quot;command-input&quot; class=&quot;game-input&quot; type=&quot;text&quot; autocomplete=&quot;off&quot; spellcheck=&quot;false&quot; placeholder=&quot;Escribe un comando… por ejemplo !bal o !rm 5m !pros&quot;&gt;
           &lt;button class=&quot;game-button command-send&quot; type=&quot;submit&quot; aria-label=&quot;Enviar comando&quot;&gt;Enviar&lt;/button&gt;
         &lt;/form&gt;
       &lt;/section&gt;
     &lt;/section&gt;
   &lt;/main&gt;
+  &lt;div class=&quot;reminder-toasts&quot; id=&quot;reminder-toasts&quot; role=&quot;status&quot; aria-live=&quot;polite&quot; aria-label=&quot;Recordatorios pendientes&quot;&gt;&lt;/div&gt;
 
   &lt;script&gt;
     (() =&gt; {
@@ -3366,7 +3374,10 @@ html&gt;body{padding:0}&lt;/style&gt;
         pendingSonar: null,
         expedition: null,
         daily: { day: &quot;&quot;, accepted: [], progress: {}, claimed: [] },
-        log: []
+        log: [],
+        reminders: [],
+        reminderAlerts: [],
+        nextReminderId: 1
       });
       const normalizeGame = (saved) =&gt; {
         const base = freshGame();
@@ -3382,7 +3393,10 @@ html&gt;body{padding:0}&lt;/style&gt;
           cooldowns: saved.cooldowns &amp;&amp; typeof saved.cooldowns === &quot;object&quot; ? saved.cooldowns : {},
           buffs: saved.buffs &amp;&amp; typeof saved.buffs === &quot;object&quot; ? saved.buffs : {},
           daily: saved.daily &amp;&amp; typeof saved.daily === &quot;object&quot; ? { ...base.daily, ...saved.daily } : base.daily,
-          log: Array.isArray(saved.log) ? saved.log.slice(0, 8) : []
+          log: Array.isArray(saved.log) ? saved.log.slice(0, 8) : [],
+          reminders: Array.isArray(saved.reminders) ? saved.reminders.filter((reminder) =&gt; reminder &amp;&amp; Number.isInteger(Number(reminder.id)) &amp;&amp; Number.isFinite(Number(reminder.dueAt)) &amp;&amp; typeof reminder.message === &quot;string&quot;).slice(0, 20) : base.reminders,
+          reminderAlerts: Array.isArray(saved.reminderAlerts) ? saved.reminderAlerts.filter((reminder) =&gt; reminder &amp;&amp; Number.isInteger(Number(reminder.id)) &amp;&amp; typeof reminder.message === &quot;string&quot;).slice(0, 20) : base.reminderAlerts,
+          nextReminderId: Number.isInteger(Number(saved.nextReminderId)) &amp;&amp; Number(saved.nextReminderId) &gt; 0 ? Number(saved.nextReminderId) : base.nextReminderId
         };
       };
 
@@ -3461,6 +3475,52 @@ html&gt;body{padding:0}&lt;/style&gt;
         const minutes = Math.floor((seconds % 3600) / 60);
         const secs = seconds % 60;
         return hours ? `${hours}:${String(minutes).padStart(2, &quot;0&quot;)}:${String(secs).padStart(2, &quot;0&quot;)}` : `${String(minutes).padStart(2, &quot;0&quot;)}:${String(secs).padStart(2, &quot;0&quot;)}`;
+      };
+      const readableDuration = (milliseconds) =&gt; {
+        const totalMinutes = Math.max(1, Math.ceil(milliseconds / 60_000));
+        if (totalMinutes &lt; 60) return `${totalMinutes} min`;
+        const days = Math.floor(totalMinutes / 1440);
+        const hours = Math.floor((totalMinutes % 1440) / 60);
+        const minutes = totalMinutes % 60;
+        if (days) return `${days} d${hours ? ` ${hours} h` : &quot;&quot;}`;
+        return `${hours} h${minutes ? ` ${minutes} min` : &quot;&quot;}`;
+      };
+      const parseReminderDuration = (raw) =&gt; {
+        const value = String(raw || &quot;&quot;).toLowerCase().replace(/\s+/g, &quot;&quot;);
+        const pattern = /(\d+)(days?|días?|d|hours?|hrs?|h|minutes?|mins?|minutos?|m|seconds?|secs?|segundos?|segs?|seg|s)/g;
+        const matches = Array.from(value.matchAll(pattern));
+        if (!matches.length || matches.map((match) =&gt; match[0]).join(&quot;&quot;) !== value) return 0;
+        const unitMs = { s: 1000, sec: 1000, secs: 1000, second: 1000, seconds: 1000, seg: 1000, segs: 1000, segundo: 1000, segundos: 1000, m: 60_000, min: 60_000, mins: 60_000, minute: 60_000, minutes: 60_000, minuto: 60_000, minutos: 60_000, h: 3_600_000, hour: 3_600_000, hours: 3_600_000, hr: 3_600_000, hrs: 3_600_000, d: 86_400_000, day: 86_400_000, days: 86_400_000, día: 86_400_000, días: 86_400_000 };
+        const total = matches.reduce((sum, match) =&gt; sum + Number(match[1]) * unitMs[match[2]], 0);
+        return total &gt; 0 &amp;&amp; total &lt;= 30 * 86_400_000 ? total : 0;
+      };
+      const renderReminderAlerts = () =&gt; {
+        const container = $(&quot;#reminder-toasts&quot;);
+        if (!container) return;
+        container.replaceChildren();
+        game.reminderAlerts.forEach((reminder) =&gt; {
+          const toast = document.createElement(&quot;article&quot;);
+          toast.className = &quot;reminder-toast&quot;;
+          const icon = document.createElement(&quot;span&quot;); icon.className = &quot;reminder-toast-icon&quot;; icon.setAttribute(&quot;aria-hidden&quot;, &quot;true&quot;); icon.textContent = &quot;⏰&quot;;
+          const copy = document.createElement(&quot;div&quot;); copy.className = &quot;reminder-toast-copy&quot;;
+          const title = document.createElement(&quot;strong&quot;); title.textContent = &quot;¡Recordatorio!&quot;;
+          const message = document.createElement(&quot;span&quot;); message.textContent = reminder.message;
+          copy.append(title, message);
+          const dismiss = document.createElement(&quot;button&quot;); dismiss.type = &quot;button&quot;; dismiss.className = &quot;reminder-dismiss&quot;; dismiss.dataset.dismissReminder = String(reminder.id); dismiss.setAttribute(&quot;aria-label&quot;, `Cerrar recordatorio ${reminder.id}`); dismiss.textContent = &quot;×&quot;;
+          toast.append(icon, copy, dismiss);
+          container.append(toast);
+        });
+      };
+      const processReminders = () =&gt; {
+        const moment = now();
+        const due = game.reminders.filter((reminder) =&gt; Number(reminder.dueAt) &lt;= moment).sort((a, b) =&gt; Number(a.dueAt) - Number(b.dueAt));
+        if (!due.length) return;
+        game.reminders = game.reminders.filter((reminder) =&gt; Number(reminder.dueAt) &gt; moment);
+        due.forEach((reminder) =&gt; addLog(`Recordatorio: ${reminder.message}`));
+        game.reminderAlerts = [...due.map((reminder) =&gt; ({ id: reminder.id, message: reminder.message, firedAt: moment })), ...game.reminderAlerts].slice(0, 20);
+        setMessage(due.length === 1 ? `Recordatorio: ${due[0].message}` : `Vencieron ${due.length} recordatorios.`);
+        persist();
+        renderReminderAlerts();
       };
       const movieSeen = (id) =&gt; seenMovies.has(id);
 
@@ -3990,7 +4050,37 @@ html&gt;body{padding:0}&lt;/style&gt;
       };
 
       const normalizeCommand = (value) =&gt; String(value || &quot;&quot;).trim().toLowerCase().replace(/^!/, &quot;&quot;);
-      const aliases = { bal: &quot;balance&quot;, op: &quot;operation&quot;, pros: &quot;prospect&quot;, son: &quot;sonar&quot;, dep: &quot;deploy&quot;, sh: &quot;shop&quot;, q: &quot;quests&quot;, inv: &quot;inventory&quot;, cf: &quot;craft&quot;, bf: &quot;buffs&quot;, z: &quot;zones&quot;, u: &quot;use&quot;, box: &quot;open&quot; };
+      const aliases = { bal: &quot;balance&quot;, op: &quot;operation&quot;, pros: &quot;prospect&quot;, son: &quot;sonar&quot;, dep: &quot;deploy&quot;, sh: &quot;shop&quot;, q: &quot;quests&quot;, inv: &quot;inventory&quot;, cf: &quot;craft&quot;, bf: &quot;buffs&quot;, z: &quot;zones&quot;, u: &quot;use&quot;, box: &quot;open&quot;, rm: &quot;remind&quot; };
+      const remind = (args) =&gt; {
+        const first = String(args[0] || &quot;&quot;).toLowerCase();
+        if (first === &quot;list&quot;) {
+          const pending = [...game.reminders].sort((a, b) =&gt; Number(a.dueAt) - Number(b.dueAt));
+          setMessage(pending.length ? `Recordatorios pendientes: ${pending.map((reminder) =&gt; `#${reminder.id} en ${readableDuration(Number(reminder.dueAt) - now())}: ${reminder.message}`).join(&quot; · &quot;)}. Para borrar uno, escribe !rm cancel &lt;número&gt;.` : &quot;No tienes recordatorios pendientes.&quot;);
+          return;
+        }
+        if (first === &quot;cancel&quot;) {
+          const id = Number(String(args[1] || &quot;&quot;).replace(/^#/, &quot;&quot;));
+          const before = game.reminders.length;
+          game.reminders = game.reminders.filter((reminder) =&gt; Number(reminder.id) !== id);
+          if (game.reminders.length === before) { setMessage(&quot;No encontré ese recordatorio pendiente. Usa !rm list para consultar sus números.&quot;); return; }
+          setMessage(`Recordatorio #${id} cancelado.`);
+          addLog(`Recordatorio #${id} cancelado`);
+          persist();
+          return;
+        }
+        const delay = parseReminderDuration(args[0]);
+        const message = args.slice(1).join(&quot; &quot;).trim();
+        if (!delay || !message) { setMessage(&quot;Escribe !rm &lt;tiempo&gt; &lt;mensaje o comando&gt;. Ejemplos: !rm 5m !pros · !rm 1h30m revisar el sonar. También puedes usar !rm list o !rm cancel &lt;número&gt;.&quot;); return; }
+        if (game.reminders.length &gt;= 20) { setMessage(&quot;Ya tienes 20 recordatorios pendientes. Usa !rm list o cancela alguno antes de añadir otro.&quot;); return; }
+        const id = game.nextReminderId;
+        game.nextReminderId += 1;
+        const dueAt = now() + delay;
+        game.reminders.push({ id, dueAt, message });
+        const when = readableDuration(delay);
+        addLog(`Recordatorio #${id} programado para ${message}`);
+        setMessage(`Recordatorio #${id} programado para dentro de ${when}: ${message}.`);
+        persist();
+      };
       const matchZone = (kind, input) =&gt; {
         const value = String(input || &quot;&quot;).toLowerCase().replaceAll(&quot;_&quot;, &quot;-&quot;);
         const available = eligibleZones(kind).filter((zone) =&gt; getLevel() &gt;= zone.level);
@@ -4033,7 +4123,8 @@ html&gt;body{padding:0}&lt;/style&gt;
           case &quot;zones&quot;: switchMainPanel(&quot;operations-panel&quot;); switchGameView(&quot;operations-view&quot;); setMessage(`Zonas desbloqueadas: ${eligibleZones(&quot;prospect&quot;).length} de prospección, ${eligibleZones(&quot;sonar&quot;).length} de sonar y ${eligibleZones(&quot;deploy&quot;).length} de misiones.`); break;
           case &quot;use&quot;: useNamedItem(args.join(&quot; &quot;)); break;
           case &quot;open&quot;: useNamedItem(args.join(&quot; &quot;) || Object.keys(itemCatalog).find((id) =&gt; itemCatalog[id].type === &quot;box&quot; &amp;&amp; itemCount(id) &gt; 0)); break;
-          case &quot;help&quot;: setMessage(&quot;Comandos: !bal, !op, !pros [zona], !son [zona], !dep [aliado] [zona], !q, !shop, !inv, !cf [receta], !bf, !z, !use [objeto], !open [caja].&quot;); break;
+          case &quot;remind&quot;: remind(args); break;
+          case &quot;help&quot;: setMessage(&quot;Comandos: !bal, !op, !pros [zona], !son [zona], !dep [aliado] [zona], !q, !shop, !inv, !cf [receta], !bf, !z, !use [objeto], !open [caja], !rm &lt;tiempo&gt; &lt;mensaje o comando&gt;. Ej.: !rm 5m !pros; !rm list; !rm cancel 1.&quot;); break;
           default: setMessage(`Comando desconocido: !${original}. Escribe !help para ver la lista.`);
         }
       };
@@ -4080,6 +4171,7 @@ html&gt;body{padding:0}&lt;/style&gt;
       $(&quot;#shop-grid&quot;).addEventListener(&quot;click&quot;, (event) =&gt; { const button = event.target.closest(&quot;[data-buy-item]&quot;); if (button) purchase(button.dataset.buyItem); });
       $(&quot;#recipe-grid&quot;).addEventListener(&quot;click&quot;, (event) =&gt; { const button = event.target.closest(&quot;[data-craft-item]&quot;); if (button) craft(button.dataset.craftItem); });
       $(&quot;#command-form&quot;).addEventListener(&quot;submit&quot;, (event) =&gt; { event.preventDefault(); const input = $(&quot;#command-input&quot;); const command = input.value.trim(); if (!command) return; runCommand(command); appendCommandEntry(command, pendingNotice); input.value = &quot;&quot;; });
+      $(&quot;#reminder-toasts&quot;).addEventListener(&quot;click&quot;, (event) =&gt; { const button = event.target.closest(&quot;[data-dismiss-reminder]&quot;); if (!button) return; const id = Number(button.dataset.dismissReminder); game.reminderAlerts = game.reminderAlerts.filter((reminder) =&gt; Number(reminder.id) !== id); persist(); renderReminderAlerts(); });
 
       window.addEventListener(&quot;mcu:watched-changed&quot;, (event) =&gt; {
         seenMovies = new Set(event.detail &amp;&amp; Array.isArray(event.detail.watched) ? event.detail.watched : watchedSet());
@@ -4097,7 +4189,9 @@ html&gt;body{padding:0}&lt;/style&gt;
       seenMovies = watchedSet();
       if (unlockCompanions()) persist();
       renderAll();
-      window.setInterval(() =&gt; { ensureDaily(); updateTimers(); }, 1000);
+      renderReminderAlerts();
+      processReminders();
+      window.setInterval(() =&gt; { ensureDaily(); updateTimers(); processReminders(); }, 1000);
     })();
   &lt;/script&gt;
 &lt;/div&gt;
